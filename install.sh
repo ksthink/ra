@@ -11,7 +11,7 @@ echo "사용자: $USER"
 
 # 시스템 패키지
 echo ">>> apt 패키지 설치..."
-sudo apt-get update
+sudo apt-get update || echo "WARNING: apt update 일부 실패, 계속 진행..."
 sudo apt-get install -y \
   python3 python3-venv python3-pip python3-dev \
   mpv \
