@@ -70,6 +70,7 @@ class Player:
             "--idle=yes",
             "--no-video",
             "--no-terminal",
+            "--ytdl=no",
             f"--input-ipc-server={MPV_SOCKET}",
             f"--volume={self.state['volume']}",
             "--network-timeout=30",
