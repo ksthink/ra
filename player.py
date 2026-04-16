@@ -133,31 +133,18 @@ class Player:
 
             pos = self._mpv_get_property("time-pos")
             dur = self._mpv_get_property("duration")
-            idle = self._mpv_get_property("core-idle")
-            eof = self._mpv_get_property("eof-reached")
-            idle_active = self._mpv_get_property("idle-active")
 
             if pos is not None:
                 self.state["position"] = round(pos, 1)
             if dur is not None:
                 self.state["duration"] = round(dur, 1)
 
-            # Log every 10 seconds for debugging
-            if int(time.time()) % 10 == 0:
-                logger.info("poll: pos=%s dur=%s idle=%s eof=%s idle_active=%s playing=%s",
-                            pos, dur, idle, eof, idle_active, self.state["playing"])
-
-            track_ended = False
-            if self.state["playing"] and not self.state["paused"]:
-                if eof:
-                    track_ended = True
-                elif idle_active:
-                    track_ended = True
-                elif idle and pos is None and dur is None:
-                    track_ended = True
-
-            if track_ended and not self._handling_track_end:
-                self._on_track_end()
+            # EOF detection: only when eof-reached is explicitly True
+            if self.state["playing"] and not self.state["paused"] and not self._handling_track_end:
+                eof = self._mpv_get_property("eof-reached")
+                if eof is True:
+                    logger.info("EOF detected: pos=%s dur=%s", pos, dur)
+                    self._on_track_end()
 
             self._notify()
 
@@ -241,12 +228,14 @@ class Player:
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
             if result.returncode != 0:
                 logger.error("yt-dlp resolve failed for %s: %s", video_id, result.stderr[:200])
+                time.sleep(2)
                 self._on_track_end()
                 return
 
             audio_url = result.stdout.strip().split("\n")[0]
             if not audio_url:
                 logger.error("yt-dlp returned empty URL for %s", video_id)
+                time.sleep(2)
                 self._on_track_end()
                 return
 
