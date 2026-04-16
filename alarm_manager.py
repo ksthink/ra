@@ -15,6 +15,7 @@ def _get_conn():
     if not hasattr(_local, "conn"):
         _local.conn = sqlite3.connect(DB_PATH)
         _local.conn.row_factory = sqlite3.Row
+        _local.conn.execute("PRAGMA journal_mode=WAL")
         _local.conn.execute("PRAGMA foreign_keys=ON")
     return _local.conn
 
@@ -124,7 +125,20 @@ class AlarmScheduler:
         current_day = now.weekday()
         today_str = now.strftime("%Y-%m-%d")
 
-        alarms = get_alarms()
+        # Use fresh connection to see latest alarms added from web UI
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        rows = conn.execute("""
+            SELECT a.id, a.time, a.playlist_id, a.repeat_type, a.repeat_days,
+                   a.enabled, a.last_triggered, p.name as playlist_name
+            FROM alarms a
+            LEFT JOIN playlists p ON a.playlist_id = p.id
+            ORDER BY a.time
+        """).fetchall()
+        alarms = [dict(r) for r in rows]
+        conn.close()
+
+        logger.debug("Alarm check at %s: %d alarms found", current_time, len(alarms))
         for alarm in alarms:
             if not alarm["enabled"]:
                 continue
@@ -155,11 +169,12 @@ class AlarmScheduler:
                      alarm["id"], alarm["playlist_id"], alarm["time"])
         try:
             self._player.load_playlist(alarm["playlist_id"])
-            conn = _get_conn()
+            conn = sqlite3.connect(DB_PATH)
             conn.execute("UPDATE alarms SET last_triggered = ? WHERE id = ?",
                          (today_str, alarm["id"]))
             if alarm["repeat_type"] == "once":
                 conn.execute("UPDATE alarms SET enabled = 0 WHERE id = ?", (alarm["id"],))
             conn.commit()
+            conn.close()
         except Exception as e:
             logger.error("Alarm trigger failed: %s", e)
