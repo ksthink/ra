@@ -2,8 +2,8 @@
 # 라즈베리파이 배포 스크립트
 set -euo pipefail
 
-PI_HOST="${PI_HOST:?PI_HOST 환경변수를 설정하세요}"
-PI_USER="${PI_USER:-pi}"
+PI_HOST="${PI_HOST:-radio.local}"
+PI_USER="${PI_USER:-radio}"
 PI_PATH="${PI_PATH:-/home/$PI_USER/radio}"
 
 echo ">>> $PI_USER@$PI_HOST:$PI_PATH 로 배포 중..."
