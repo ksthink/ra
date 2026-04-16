@@ -90,15 +90,18 @@ class Player:
             return None
         try:
             sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-            sock.settimeout(2)
+            sock.settimeout(5)
             sock.connect(MPV_SOCKET)
             cmd = json.dumps({"command": list(args)}) + "\n"
             sock.sendall(cmd.encode())
-            data = sock.recv(4096)
+            data = sock.recv(8192)
             sock.close()
-            return json.loads(data.decode().strip().split("\n")[0])
+            resp = json.loads(data.decode().strip().split("\n")[0])
+            if resp.get("error") and resp["error"] != "success":
+                logger.warning("mpv cmd %s error: %s", args[0] if args else '?', resp["error"])
+            return resp
         except Exception as e:
-            logger.debug("mpv cmd error: %s", e)
+            logger.error("mpv IPC error (%s): %s", args[0] if args else '?', e)
             return None
 
     def _mpv_get_property(self, prop):
@@ -203,11 +206,13 @@ class Player:
                 self._on_track_end()
                 return
 
-            audio_url = result.stdout.strip()
+            audio_url = result.stdout.strip().split("\n")[0]
             if not audio_url:
                 logger.error("yt-dlp returned empty URL for %s", video_id)
                 self._on_track_end()
                 return
+
+            logger.info("Resolved %s -> URL length %d", video_id, len(audio_url))
 
             if not self._use_mpv:
                 logger.info("MOCK play: %s", self.state["track"]["title"])
@@ -216,7 +221,8 @@ class Player:
                 self._notify()
                 return
 
-            self._mpv_cmd("loadfile", audio_url, "replace")
+            resp = self._mpv_cmd("loadfile", audio_url, "replace")
+            logger.info("mpv loadfile response: %s", resp)
             self._notify()
 
         except Exception as e:
