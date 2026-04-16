@@ -26,6 +26,7 @@ class Player:
         self._poll_thread = None
         self._use_mpv = not MOCK_AUDIO  # MOCK_AUDIO=False → mpv 사용
         self._handling_track_end = False
+        self._playback_started = False  # True once pos > 0 seen
 
         # State
         self.state = {
@@ -133,18 +134,22 @@ class Player:
 
             pos = self._mpv_get_property("time-pos")
             dur = self._mpv_get_property("duration")
+            idle = self._mpv_get_property("core-idle")
 
             if pos is not None:
                 self.state["position"] = round(pos, 1)
+                if pos > 0:
+                    self._playback_started = True
             if dur is not None:
                 self.state["duration"] = round(dur, 1)
 
-            # EOF detection: only when eof-reached is explicitly True
-            if self.state["playing"] and not self.state["paused"] and not self._handling_track_end:
-                eof = self._mpv_get_property("eof-reached")
-                if eof is True:
-                    logger.info("EOF detected: pos=%s dur=%s", pos, dur)
-                    self._on_track_end()
+            # EOF detection: playback was active (pos>0 seen) and now core-idle
+            if (self.state["playing"] and not self.state["paused"]
+                    and not self._handling_track_end
+                    and self._playback_started and idle is True and pos is None):
+                logger.info("EOF detected: idle=%s, pos=%s, dur=%s, started=%s",
+                            idle, pos, dur, self._playback_started)
+                self._on_track_end()
 
             self._notify()
 
@@ -210,6 +215,7 @@ class Player:
         self.state["duration"] = float(track.get("duration", 0))
         self.state["playing"] = True
         self.state["paused"] = False
+        self._playback_started = False
         self._notify()
 
         threading.Thread(target=self._resolve_and_play, args=(track["video_id"],), daemon=True).start()
