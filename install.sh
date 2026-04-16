@@ -36,7 +36,7 @@ grep -q "^gpio=25=op,dh" "$BOOT_CONFIG" || echo "gpio=25=op,dh" | sudo tee -a "$
 grep -q "^dtoverlay=hifiberry-dac" "$BOOT_CONFIG" || echo "dtoverlay=hifiberry-dac" | sudo tee -a "$BOOT_CONFIG"
 
 # Pirate Audio Python 라이브러리 (venv)
-"$INSTALL_DIR/.venv/bin/pip" install st7789 RPi.GPIO spidev numpy
+"$INSTALL_DIR/.venv/bin/pip" install st7789 gpiozero lgpio spidev numpy
 
 # data 디렉토리
 mkdir -p "$INSTALL_DIR/data"

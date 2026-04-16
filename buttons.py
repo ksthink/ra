@@ -33,32 +33,22 @@ class Buttons:
     def stop(self):
         self._running = False
         if not MOCK:
-            try:
-                import RPi.GPIO as GPIO
-                GPIO.cleanup()
-            except Exception:
-                pass
+            for btn in getattr(self, '_gpio_buttons', []):
+                btn.close()
 
     def _setup_gpio(self):
-        import RPi.GPIO as GPIO
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setwarnings(False)
+        from gpiozero import Button
 
-        for pin in (PIN_A, PIN_B, PIN_X, PIN_Y):
-            GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
-        GPIO.add_event_detect(PIN_A, GPIO.FALLING,
-                              callback=lambda _: self._handle(self.on_volume_up),
-                              bouncetime=BUTTON_DEBOUNCE_MS)
-        GPIO.add_event_detect(PIN_B, GPIO.FALLING,
-                              callback=lambda _: self._handle(self.on_prev),
-                              bouncetime=BUTTON_DEBOUNCE_MS)
-        GPIO.add_event_detect(PIN_X, GPIO.FALLING,
-                              callback=lambda _: self._handle(self.on_volume_down),
-                              bouncetime=BUTTON_DEBOUNCE_MS)
-        GPIO.add_event_detect(PIN_Y, GPIO.FALLING,
-                              callback=lambda _: self._handle(self.on_next),
-                              bouncetime=BUTTON_DEBOUNCE_MS)
+        self._gpio_buttons = []
+        for pin, cb_attr in [
+            (PIN_A, 'on_volume_up'),
+            (PIN_B, 'on_prev'),
+            (PIN_X, 'on_volume_down'),
+            (PIN_Y, 'on_next'),
+        ]:
+            btn = Button(pin, pull_up=True, bounce_time=BUTTON_DEBOUNCE_MS / 1000.0)
+            btn.when_pressed = lambda attr=cb_attr: self._handle(getattr(self, attr))
+            self._gpio_buttons.append(btn)
 
     def _handle(self, callback):
         if self.on_any:
