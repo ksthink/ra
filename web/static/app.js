@@ -308,4 +308,9 @@
     loadScreensaverPreview();
   });
 
+  document.getElementById('btn-test-ss').addEventListener('click', async () => {
+    const res = await postJson('/api/screensaver/test', { duration: 10 });
+    if (res.error) alert(res.error);
+  });
+
 })();

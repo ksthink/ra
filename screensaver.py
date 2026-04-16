@@ -21,6 +21,8 @@ class Screensaver:
         self._running = False
         self._gif_frames = []
         self._gif_durations = []
+        self._on_deactivate = None
+        self._preview_until = 0
 
     @property
     def active(self):
@@ -56,6 +58,12 @@ class Screensaver:
             return
         self._active = False
         logger.info("Screensaver deactivated")
+        # restore player display
+        if self._on_deactivate:
+            try:
+                self._on_deactivate()
+            except Exception as e:
+                logger.error("on_deactivate error: %s", e)
 
     def reload_gif(self):
         self._load_gif()
@@ -93,9 +101,28 @@ class Screensaver:
     def _is_enabled(self):
         return playlist_manager.get_setting("screensaver_enabled", "1") == "1"
 
+    def preview(self, duration=10):
+        """Immediately show screensaver for duration seconds."""
+        if not self._gif_frames:
+            self._load_gif()
+        if not self._gif_frames:
+            logger.warning("Preview requested but no GIF frames")
+            return False
+        self._preview_until = time.time() + duration
+        if not self._active:
+            self._active = True
+            logger.info("Screensaver preview started (%ds)", duration)
+        return True
+
     def _monitor_loop(self):
         frame_idx = 0
         while self._running:
+            # Check preview timeout
+            if self._preview_until > 0 and time.time() >= self._preview_until:
+                self._preview_until = 0
+                self.deactivate()
+                continue
+
             if not self._active:
                 if (self._is_enabled()
                         and self._gif_frames

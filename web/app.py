@@ -19,11 +19,13 @@ app.config["SECRET_KEY"] = "radio-secret"
 socketio = SocketIO(app, async_mode="threading", cors_allowed_origins="*")
 
 _player = None
+_screensaver = None
 
 
-def init_web(player):
-    global _player
+def init_web(player, screensaver=None):
+    global _player, _screensaver
     _player = player
+    _screensaver = screensaver
 
 
 def broadcast_state(state):
@@ -204,6 +206,8 @@ def api_upload_gif():
         return jsonify({"error": f"File too large (max {SCREENSAVER_MAX_GIF_SIZE // 1024 // 1024}MB)"}), 400
 
     f.save(SCREENSAVER_GIF_PATH)
+    if _screensaver:
+        _screensaver.reload_gif()
     socketio.emit("screensaver_updated")
     return jsonify({"ok": True, "size": size})
 
@@ -219,7 +223,21 @@ def api_screensaver_preview():
 def api_delete_screensaver():
     if os.path.exists(SCREENSAVER_GIF_PATH):
         os.remove(SCREENSAVER_GIF_PATH)
+    if _screensaver:
+        _screensaver.reload_gif()
     return jsonify({"ok": True})
+
+
+@app.route("/api/screensaver/test", methods=["POST"])
+def api_screensaver_test():
+    if not _screensaver:
+        return jsonify({"error": "Screensaver not available"}), 500
+    data = request.get_json(silent=True) or {}
+    duration = min(30, max(3, int(data.get("duration", 10))))
+    ok = _screensaver.preview(duration)
+    if not ok:
+        return jsonify({"error": "GIF가 없습니다"}), 400
+    return jsonify({"ok": True, "duration": duration})
 
 
 @socketio.on("connect")

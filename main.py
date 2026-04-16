@@ -28,14 +28,17 @@ def main():
     player = Player()
     screensaver = Screensaver(display)
 
-    init_web(player)
+    init_web(player, screensaver)
 
     def on_state_change(state):
         broadcast_state(state)
-        display.render_player(state)
+        if not screensaver.active:
+            display.render_player(state)
         screensaver.reset_timer()
 
     player.on_state_change = on_state_change
+
+    screensaver._on_deactivate = lambda: display.render_player(player.get_state())
 
     def on_activity():
         screensaver.reset_timer()
