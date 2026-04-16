@@ -151,6 +151,7 @@ class Player:
     def _notify(self):
         if self.on_state_change:
             try:
+                logger.info("_notify: playing=%s, track=%s", self.state.get('playing'), self.state.get('track', {}).get('title') if self.state.get('track') else None)
                 self.on_state_change(self.get_state())
             except Exception as e:
                 logger.error("State change callback error: %s", e)

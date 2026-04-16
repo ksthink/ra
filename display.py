@@ -74,7 +74,7 @@ class Display:
         draw = ImageDraw.Draw(img)
 
         track = state.get("track")
-        logger.debug("render_player: track=%s, playing=%s", track.get('title') if track else None, state.get('playing'))
+        logger.info("render_player: track=%s, playing=%s", track.get('title') if track else None, state.get('playing'))
         if not track:
             draw.text((DISPLAY_WIDTH // 2 - 50, DISPLAY_HEIGHT // 2 - 10),
                        "No Track", fill=(128, 128, 128), font=self._font_title)
