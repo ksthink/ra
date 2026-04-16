@@ -188,10 +188,10 @@ class Player:
             url = f"https://www.youtube.com/watch?v={video_id}"
             cmd = [
                 "yt-dlp",
-                "-f", "bestaudio/best",
+                "-f", "bestaudio[ext=m4a]/bestaudio/best",
                 "--get-url",
                 "--no-warnings",
-                "--quiet",
+                "--no-check-certificates",
                 url,
             ]
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
