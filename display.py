@@ -48,17 +48,25 @@ class Display:
         self._thumb_cache = {}
 
         if _st7789 and not MOCK:
-            self._disp = _st7789.ST7789(
-                port=DISPLAY_SPI_PORT,
-                cs=DISPLAY_SPI_CS,
-                dc=DISPLAY_DC,
-                backlight=DISPLAY_BACKLIGHT,
-                rotation=DISPLAY_ROTATION,
-                spi_speed_hz=DISPLAY_SPI_SPEED_MHZ * 1_000_000,
-                width=DISPLAY_WIDTH,
-                height=DISPLAY_HEIGHT,
-            )
-            self._disp.begin()
+            try:
+                self._disp = _st7789.ST7789(
+                    port=DISPLAY_SPI_PORT,
+                    cs=DISPLAY_SPI_CS,
+                    dc=DISPLAY_DC,
+                    backlight=DISPLAY_BACKLIGHT,
+                    rotation=DISPLAY_ROTATION,
+                    spi_speed_hz=DISPLAY_SPI_SPEED_MHZ * 1_000_000,
+                    width=DISPLAY_WIDTH,
+                    height=DISPLAY_HEIGHT,
+                )
+                self._disp.begin()
+                logger.info("ST7789 display initialized (port=%d, cs=%d, dc=%d, bl=%d)",
+                            DISPLAY_SPI_PORT, DISPLAY_SPI_CS, DISPLAY_DC, DISPLAY_BACKLIGHT)
+            except Exception as e:
+                logger.error("ST7789 init failed: %s", e, exc_info=True)
+                self._disp = None
+        else:
+            logger.info("Display: mock mode (st7789=%s, MOCK=%s)", _st7789 is not None, MOCK)
 
         self._font_title = _get_font(16)
         self._font_small = _get_font(12)
@@ -141,8 +149,12 @@ class Display:
     def _show(self, img):
         with self._lock:
             if self._disp:
-                self._disp.display(img)
+                try:
+                    self._disp.display(img)
+                except Exception as e:
+                    logger.error("SPI display error: %s", e, exc_info=True)
             else:
+                logger.warning("_show: no display device (mock mode)")
                 img.save(os.path.join(BASE_DIR, "display_preview.png"))
 
     def _load_thumbnail(self, url):
