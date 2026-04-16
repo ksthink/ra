@@ -188,7 +188,7 @@ class Player:
             url = f"https://www.youtube.com/watch?v={video_id}"
             cmd = [
                 "yt-dlp",
-                "-f", "bestaudio",
+                "-f", "bestaudio/best",
                 "--get-url",
                 "--no-warnings",
                 "--quiet",

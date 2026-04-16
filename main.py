@@ -26,12 +26,12 @@ def main():
 
     def on_state_change(state):
         broadcast_state(state)
-        screensaver.notify_activity()
+        screensaver.reset_timer()
 
     player.on_state_change = on_state_change
 
     def on_activity():
-        screensaver.notify_activity()
+        screensaver.reset_timer()
 
     buttons = Buttons()
     buttons.on_volume_up = lambda: (player.volume_up(), on_activity())
