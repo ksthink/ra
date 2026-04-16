@@ -15,7 +15,7 @@ sudo apt-get update || echo "WARNING: apt update 일부 실패, 계속 진행...
 sudo apt-get install -y \
   python3 python3-venv python3-pip python3-dev \
   mpv \
-  libopenjp2-7 libtiff5 libatlas-base-dev \
+  libopenjp2-7 libtiff6 libatlas-base-dev \
   fonts-nanum
 
 # Python 가상환경
