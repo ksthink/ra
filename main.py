@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
 """YouTube Playlist Network Radio – 메인 엔트리포인트"""
 
+import logging
 import signal
 import sys
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
+)
 
 from config import MOCK, WEB_PORT
 import playlist_manager
