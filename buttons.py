@@ -40,18 +40,18 @@ class Buttons:
         from gpiozero import Button
 
         self._gpio_buttons = []
-        for pin, cb_attr in [
-            (PIN_A, 'on_volume_up'),
-            (PIN_B, 'on_prev'),
-            (PIN_X, 'on_volume_down'),
-            (PIN_Y, 'on_next'),
+        for pin, cb_attr, name in [
+            (PIN_A, 'on_volume_up', 'A(vol+)'),
+            (PIN_B, 'on_prev', 'B(prev)'),
+            (PIN_X, 'on_volume_down', 'X(vol-)'),
+            (PIN_Y, 'on_next', 'Y(next)'),
         ]:
             btn = Button(pin, pull_up=True, bounce_time=BUTTON_DEBOUNCE_MS / 1000.0)
-            btn.when_pressed = lambda attr=cb_attr: self._handle(getattr(self, attr))
+            btn.when_pressed = lambda attr=cb_attr, n=name: self._handle(getattr(self, attr), n)
             self._gpio_buttons.append(btn)
 
-    def _handle(self, callback):
-        logger.info("Button pressed: %s", callback.__name__ if hasattr(callback, '__name__') else callback)
+    def _handle(self, callback, name="?"):
+        logger.info("Button pressed: %s", name)
         if self.on_any:
             try:
                 self.on_any()
