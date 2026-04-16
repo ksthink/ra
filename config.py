@@ -16,7 +16,7 @@ PIN_B = 6   # 하단 좌측 - 이전곡
 PIN_X = 16  # 상단 우측 - 볼륨 다운
 PIN_Y = 24  # 하단 우측 - 다음곡
 
-BUTTON_DEBOUNCE_MS = 300
+BUTTON_DEBOUNCE_MS = 150
 
 # --- Display ---
 DISPLAY_WIDTH = 240

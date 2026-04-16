@@ -51,6 +51,7 @@ class Buttons:
             self._gpio_buttons.append(btn)
 
     def _handle(self, callback):
+        logger.info("Button pressed: %s", callback.__name__ if hasattr(callback, '__name__') else callback)
         if self.on_any:
             try:
                 self.on_any()
