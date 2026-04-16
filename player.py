@@ -188,6 +188,7 @@ class Player:
         self.state["duration"] = float(track.get("duration", 0))
         self.state["playing"] = True
         self.state["paused"] = False
+        self._notify()
 
         threading.Thread(target=self._resolve_and_play, args=(track["video_id"],), daemon=True).start()
 

@@ -64,10 +64,17 @@ class Display:
         self._font_small = _get_font(12)
 
     def render_player(self, state):
+        try:
+            self._render_player_inner(state)
+        except Exception as e:
+            logger.error("Display render error: %s", e, exc_info=True)
+
+    def _render_player_inner(self, state):
         img = Image.new("RGB", (DISPLAY_WIDTH, DISPLAY_HEIGHT), (0, 0, 0))
         draw = ImageDraw.Draw(img)
 
         track = state.get("track")
+        logger.debug("render_player: track=%s, playing=%s", track.get('title') if track else None, state.get('playing'))
         if not track:
             draw.text((DISPLAY_WIDTH // 2 - 50, DISPLAY_HEIGHT // 2 - 10),
                        "No Track", fill=(128, 128, 128), font=self._font_title)
