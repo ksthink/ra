@@ -77,8 +77,6 @@ class Player:
             "--demuxer-max-bytes=50MiB",
             "--log-file=/tmp/mpv-radio.log",
         ]
-        if not _is_mac:
-            cmd.append("--audio-device=alsa/default")
         self._mpv_proc = subprocess.Popen(
             cmd, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
         )
