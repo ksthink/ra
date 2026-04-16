@@ -1,6 +1,7 @@
 import subprocess
 import json
 import socket
+import sys
 import threading
 import time
 import logging
@@ -13,6 +14,8 @@ import playlist_manager
 logger = logging.getLogger(__name__)
 
 _is_mac = platform.system() == "Darwin"
+_venv_bin = os.path.dirname(sys.executable)
+_ytdlp = os.path.join(_venv_bin, "yt-dlp") if os.path.exists(os.path.join(_venv_bin, "yt-dlp")) else "yt-dlp"
 
 
 class Player:
@@ -187,7 +190,7 @@ class Player:
         try:
             url = f"https://www.youtube.com/watch?v={video_id}"
             cmd = [
-                "yt-dlp",
+                _ytdlp,
                 "-f", "bestaudio[ext=m4a]/bestaudio/best",
                 "--get-url",
                 "--no-warnings",

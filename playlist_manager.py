@@ -1,12 +1,17 @@
 import sqlite3
+import sys
 import threading
 import subprocess
 import json
 import logging
+import os
 
 from config import DB_PATH
 
 logger = logging.getLogger(__name__)
+
+_venv_bin = os.path.dirname(sys.executable)
+_ytdlp = os.path.join(_venv_bin, "yt-dlp") if os.path.exists(os.path.join(_venv_bin, "yt-dlp")) else "yt-dlp"
 
 _local = threading.local()
 
@@ -64,7 +69,7 @@ def fetch_playlist_info(url):
     yt_id = _extract_playlist_id(url)
     full_url = f"https://www.youtube.com/playlist?list={yt_id}"
     cmd = [
-        "yt-dlp",
+        _ytdlp,
         "--flat-playlist",
         "--dump-json",
         "--no-warnings",
