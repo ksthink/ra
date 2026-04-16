@@ -34,7 +34,6 @@ def main():
         broadcast_state(state)
         if not screensaver.active:
             display.render_player(state)
-        screensaver.reset_timer()
 
     player.on_state_change = on_state_change
 
