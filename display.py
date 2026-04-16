@@ -163,7 +163,8 @@ class Display:
         if url in self._thumb_cache:
             return self._thumb_cache[url].copy()
         try:
-            safe_name = url.split("/")[-1].split("?")[0][:50] + ".jpg"
+            import hashlib
+            safe_name = hashlib.md5(url.encode()).hexdigest()[:16] + ".jpg"
             cache_path = os.path.join(THUMBNAIL_CACHE_DIR, safe_name)
             if os.path.exists(cache_path):
                 thumb = Image.open(cache_path)
