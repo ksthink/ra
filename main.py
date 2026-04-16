@@ -26,6 +26,7 @@ def main():
 
     def on_state_change(state):
         broadcast_state(state)
+        display.render_player(state)
         screensaver.reset_timer()
 
     player.on_state_change = on_state_change
@@ -55,6 +56,7 @@ def main():
     signal.signal(signal.SIGTERM, shutdown)
 
     # 백그라운드 스레드 시작
+    player.start()
     screensaver.start()
     buttons.start()
     alarm.start()
