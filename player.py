@@ -74,11 +74,12 @@ class Player:
             f"--volume={self.state['volume']}",
             "--network-timeout=30",
             "--demuxer-max-bytes=50MiB",
+            "--log-file=/tmp/mpv-radio.log",
         ]
         if not _is_mac:
             cmd.append("--audio-device=alsa/default")
         self._mpv_proc = subprocess.Popen(
-            cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            cmd, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
         )
         for _ in range(30):
             if os.path.exists(MPV_SOCKET):
