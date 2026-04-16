@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Radio</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div id="app">
+  <!-- Tab Bar -->
+  <nav class="tabs">
+    <button class="tab active" data-tab="player">재생</button>
+    <button class="tab" data-tab="playlists">플레이리스트</button>
+    <button class="tab" data-tab="settings">설정</button>
+  </nav>
+
+  <!-- ====== Player Tab ====== -->
+  <section id="tab-player" class="tab-content active">
+    <div class="player-thumb-wrap">
+      <img id="player-thumb" src="" alt="" class="player-thumb">
+      <div id="no-track" class="no-track">재생 중인 곡이 없습니다</div>
+    </div>
+    <div class="player-info">
+      <div id="player-title" class="player-title"></div>
+    </div>
+    <div class="player-progress">
+      <span id="player-pos">0:00</span>
+      <input type="range" id="player-seek" min="0" max="100" value="0" step="0.1">
+      <span id="player-dur">0:00</span>
+    </div>
+    <div class="player-controls">
+      <button id="btn-prev" class="ctrl-btn" title="이전">⏮</button>
+      <button id="btn-toggle" class="ctrl-btn ctrl-play" title="재생/정지">▶</button>
+      <button id="btn-next" class="ctrl-btn" title="다음">⏭</button>
+    </div>
+    <div class="player-volume">
+      <span>🔊</span>
+      <input type="range" id="player-vol" min="0" max="100" value="70">
+      <span id="vol-label">70</span>
+    </div>
+    <div class="player-tracklist">
+      <h3>재생 목록</h3>
+      <ul id="tracklist"></ul>
+    </div>
+  </section>
+
+  <!-- ====== Playlists Tab ====== -->
+  <section id="tab-playlists" class="tab-content">
+    <div class="pl-add">
+      <input type="text" id="pl-url" placeholder="YouTube 플레이리스트 URL" autocomplete="off">
+      <button id="btn-add-pl">추가</button>
+    </div>
+    <div id="pl-status" class="pl-status"></div>
+    <ul id="pl-list" class="pl-list"></ul>
+  </section>
+
+  <!-- ====== Settings Tab ====== -->
+  <section id="tab-settings" class="tab-content">
+    <!-- Alarm Section -->
+    <div class="settings-section">
+      <h3>⏰ 알람</h3>
+      <div id="alarm-list" class="alarm-list"></div>
+      <div id="alarm-form" class="alarm-form" style="display:none">
+        <div class="form-row">
+          <label>시간</label>
+          <input type="time" id="alarm-time" required>
+        </div>
+        <div class="form-row">
+          <label>플레이리스트</label>
+          <select id="alarm-playlist"></select>
+        </div>
+        <div class="form-row">
+          <label>반복</label>
+          <select id="alarm-repeat">
+            <option value="daily">매일</option>
+            <option value="once">한번만</option>
+            <option value="weekdays">평일 (월~금)</option>
+            <option value="weekends">주말 (토~일)</option>
+            <option value="custom">사용자 지정</option>
+          </select>
+        </div>
+        <div class="form-row" id="alarm-days-row" style="display:none">
+          <label>요일</label>
+          <div class="day-checks">
+            <label><input type="checkbox" value="0">월</label>
+            <label><input type="checkbox" value="1">화</label>
+            <label><input type="checkbox" value="2">수</label>
+            <label><input type="checkbox" value="3">목</label>
+            <label><input type="checkbox" value="4">금</label>
+            <label><input type="checkbox" value="5">토</label>
+            <label><input type="checkbox" value="6">일</label>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button id="btn-save-alarm" class="btn-primary">저장</button>
+          <button id="btn-cancel-alarm" class="btn-secondary">취소</button>
+        </div>
+      </div>
+      <button id="btn-add-alarm" class="btn-add">+ 알람 추가</button>
+    </div>
+
+    <!-- Screensaver Section -->
+    <div class="settings-section">
+      <h3>🖼 화면보호기</h3>
+      <div class="ss-preview-wrap">
+        <img id="ss-preview" src="" alt="미리보기" class="ss-preview" style="display:none">
+        <div id="ss-no-gif" class="ss-no-gif">GIF가 없습니다</div>
+      </div>
+      <div class="form-row">
+        <label>GIF 업로드 (최대 2MB)</label>
+        <input type="file" id="ss-file" accept=".gif">
+        <button id="btn-upload-gif" class="btn-primary">업로드</button>
+        <button id="btn-delete-gif" class="btn-danger">삭제</button>
+      </div>
+      <div class="form-row">
+        <label>대기 시간: <span id="ss-timeout-label">10</span>분</label>
+        <input type="range" id="ss-timeout" min="1" max="60" value="10">
+      </div>
+      <div class="form-row">
+        <label>활성화</label>
+        <label class="toggle">
+          <input type="checkbox" id="ss-enabled" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.min.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>

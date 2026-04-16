@@ -1,0 +1,16 @@
+[Unit]
+Description=YouTube Playlist Network Radio
+After=network-online.target sound.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=__USER__
+WorkingDirectory=__INSTALL_DIR__
+ExecStart=__INSTALL_DIR__/.venv/bin/python __INSTALL_DIR__/main.py
+Restart=on-failure
+RestartSec=5
+Environment=RADIO_MOCK=0
+
+[Install]
+WantedBy=multi-user.target
