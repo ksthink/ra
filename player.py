@@ -25,6 +25,7 @@ class Player:
         self._running = False
         self._poll_thread = None
         self._use_mpv = not MOCK_AUDIO  # MOCK_AUDIO=False → mpv 사용
+        self._handling_track_end = False
 
         # State
         self.state = {
@@ -141,23 +142,31 @@ class Player:
 
             if idle and self.state["playing"] and not self.state["paused"]:
                 eof = self._mpv_get_property("eof-reached")
-                if eof:
+                if eof and not self._handling_track_end:
                     self._on_track_end()
 
             self._notify()
 
     def _on_track_end(self):
-        mode = self.state["play_mode"]
-        if mode == "repeat_one":
-            self._play_current()
-        elif mode == "single":
-            self.state["playing"] = False
-            self.state["paused"] = False
-            if self._use_mpv:
-                self._mpv_cmd("stop")
-            self._notify()
-        else:
-            self.next_track()
+        self._handling_track_end = True
+        try:
+            mode = self.state["play_mode"]
+            logger.info("Track ended, mode=%s", mode)
+            if mode == "repeat_one":
+                self.state["position"] = 0.0
+                if self._use_mpv:
+                    self._mpv_cmd("seek", 0, "absolute")
+                self._notify()
+            elif mode == "single":
+                self.state["playing"] = False
+                self.state["paused"] = False
+                if self._use_mpv:
+                    self._mpv_cmd("stop")
+                self._notify()
+            else:
+                self.next_track()
+        finally:
+            self._handling_track_end = False
 
     def _notify(self):
         if self.on_state_change:
