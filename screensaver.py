@@ -42,7 +42,7 @@ class Screensaver:
 
     def reset_timer(self):
         self._last_activity = time.time()
-        if self._active:
+        if self._active and self._preview_until == 0:
             self.deactivate()
 
     def activate(self):
