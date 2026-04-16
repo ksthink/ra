@@ -88,6 +88,14 @@ def api_seek():
     return jsonify({"ok": True})
 
 
+@app.route("/api/play_mode", methods=["POST"])
+def api_play_mode():
+    data = request.get_json(silent=True) or {}
+    mode = data.get("mode", "")
+    _player.set_play_mode(mode)
+    return jsonify({"ok": True, "play_mode": _player.state["play_mode"]})
+
+
 @app.route("/api/playlists")
 def api_playlists():
     return jsonify(playlist_manager.get_playlists())

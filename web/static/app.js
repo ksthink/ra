@@ -49,6 +49,10 @@
   }
 
   // ===== Player State =====
+  const modeIcons = { sequential: '🔁', single: '🔂', repeat_one: '🔂¹' };
+  const modeLabels = { sequential: '연속 재생', single: '한곡 재생', repeat_one: '한곡 반복' };
+  const modeOrder = ['sequential', 'single', 'repeat_one'];
+
   function updateUI(state) {
     currentState = state;
     const thumb = document.getElementById('player-thumb');
@@ -60,6 +64,7 @@
     const toggleBtn = document.getElementById('btn-toggle');
     const volBar = document.getElementById('player-vol');
     const volLabel = document.getElementById('vol-label');
+    const modeBtn = document.getElementById('btn-mode');
 
     if (state.track) {
       thumb.src = state.track.thumbnail_url || '';
@@ -82,6 +87,10 @@
     toggleBtn.textContent = (state.playing && !state.paused) ? '⏸' : '▶';
     volBar.value = state.volume || 0;
     volLabel.textContent = state.volume || 0;
+
+    const mode = state.play_mode || 'sequential';
+    modeBtn.textContent = modeIcons[mode] || '🔁';
+    modeBtn.title = modeLabels[mode] || '연속 재생';
 
     renderTracklist(state.tracks || [], state.track_index);
   }
@@ -107,6 +116,12 @@
   document.getElementById('btn-toggle').addEventListener('click', () => postJson('/api/toggle'));
   document.getElementById('btn-next').addEventListener('click', () => postJson('/api/next'));
   document.getElementById('btn-prev').addEventListener('click', () => postJson('/api/prev'));
+  document.getElementById('btn-mode').addEventListener('click', () => {
+    const cur = currentState.play_mode || 'sequential';
+    const idx = modeOrder.indexOf(cur);
+    const next = modeOrder[(idx + 1) % modeOrder.length];
+    postJson('/api/play_mode', { mode: next });
+  });
 
   const seekBar = document.getElementById('player-seek');
   seekBar.addEventListener('mousedown', () => seeking = true);

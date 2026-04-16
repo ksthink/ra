@@ -39,6 +39,7 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Sego
 .ctrl-btn { width: 52px; height: 52px; border-radius: 50%; border: none; background: var(--surface2); color: var(--text); font-size: 22px; cursor: pointer; transition: .15s; display: flex; align-items: center; justify-content: center; }
 .ctrl-btn:active { transform: scale(0.92); }
 .ctrl-play { width: 62px; height: 62px; background: var(--accent); color: #fff; font-size: 26px; }
+.ctrl-mode { width: 44px; height: 44px; font-size: 18px; align-self: center; }
 
 .player-volume { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
 .player-volume input[type=range] { flex: 1; }

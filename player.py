@@ -38,6 +38,7 @@ class Player:
             "playlist_id": None,
             "playlist_name": "",
             "tracks": [],
+            "play_mode": playlist_manager.get_setting("play_mode", "sequential"),
         }
 
         self.on_state_change = None
@@ -146,7 +147,17 @@ class Player:
             self._notify()
 
     def _on_track_end(self):
-        self.next_track()
+        mode = self.state["play_mode"]
+        if mode == "repeat_one":
+            self._play_current()
+        elif mode == "single":
+            self.state["playing"] = False
+            self.state["paused"] = False
+            if self._use_mpv:
+                self._mpv_cmd("stop")
+            self._notify()
+        else:
+            self.next_track()
 
     def _notify(self):
         if self.on_state_change:
@@ -256,6 +267,13 @@ class Player:
             self.pause()
         elif self.state["tracks"]:
             self._play_current()
+
+    def set_play_mode(self, mode):
+        if mode not in ("sequential", "single", "repeat_one"):
+            return
+        self.state["play_mode"] = mode
+        playlist_manager.set_setting("play_mode", mode)
+        self._notify()
 
     def next_track(self):
         if not self.state["tracks"]:
